@@ -3,9 +3,9 @@
 
 #include "Player/STUBaseCharacter.h"
 
-#include "STUBaseWeapon.h"
 #include "STUCharacterMovementComponent.h"
 #include "STUHealthComponent.h"
+#include "STUWeaponComponent.h"
 #include "Camera/CameraComponent.h"
 #include "Components/TextRenderComponent.h"
 #include "GameFramework/SpringArmComponent.h"
@@ -22,6 +22,7 @@ ASTUBaseCharacter::ASTUBaseCharacter(const FObjectInitializer& ObjectInitializer
 	SpringArmComponent = CreateDefaultSubobject<USpringArmComponent>("SpringArmComponent");
 	SpringArmComponent->SetupAttachment(GetRootComponent());
 	SpringArmComponent->bUsePawnControlRotation = true;
+	SpringArmComponent->SocketOffset = FVector(0.0f, 100.f, 80.0f);
 
 	CameraComponent = CreateDefaultSubobject<UCameraComponent>("CameraComponent");
 	CameraComponent->SetupAttachment(SpringArmComponent);
@@ -30,6 +31,10 @@ ASTUBaseCharacter::ASTUBaseCharacter(const FObjectInitializer& ObjectInitializer
 
 	HealthTextComponent = CreateDefaultSubobject<UTextRenderComponent>("HealthTextComponent");
 	HealthTextComponent->SetupAttachment(GetRootComponent());
+	HealthTextComponent->SetOwnerNoSee(true);
+
+	WeaponComponent = CreateDefaultSubobject<USTUWeaponComponent>("WeaponComponent");
+	
 
 }
 
@@ -47,8 +52,6 @@ void ASTUBaseCharacter::BeginPlay()
 	HealthComponent->OnHealthChanged.AddUObject(this, &ASTUBaseCharacter::OnHealthChanged);
 
 	LandedDelegate.AddDynamic(this, &ASTUBaseCharacter::OnGroundLanded);
-
-	SpawnWeapon();
 }
 
 // Called every frame
@@ -64,6 +67,7 @@ void ASTUBaseCharacter::Tick(float DeltaTime)
 void ASTUBaseCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
+	check(WeaponComponent);
 
 	PlayerInputComponent->BindAxis("MoveForward", this, &ASTUBaseCharacter::MoveForward);
 	PlayerInputComponent->BindAxis("MoveRight", this, &ASTUBaseCharacter::MoveRight);
@@ -73,6 +77,7 @@ void ASTUBaseCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 	PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &ASTUBaseCharacter::Jump);
 	PlayerInputComponent->BindAction("Run", IE_Pressed, this, &ASTUBaseCharacter::OnStartRunning);
 	PlayerInputComponent->BindAction("Run", IE_Released, this, &ASTUBaseCharacter::OnStopRunning);
+	PlayerInputComponent->BindAction("Fire", IE_Pressed, WeaponComponent, &USTUWeaponComponent::Fire);
 
 }
 
@@ -161,14 +166,4 @@ void ASTUBaseCharacter::OnGroundLanded(const FHitResult& HitResult)
 	TakeDamage(FinalDamage, FDamageEvent{}, nullptr, nullptr);
 }
 
-void ASTUBaseCharacter::SpawnWeapon()
-{
-	if (!GetWorld()) return;
 
-	const auto Weapon = GetWorld()->SpawnActor<ASTUBaseWeapon>(WeaponClass);
-	if (Weapon)
-	{
-		FAttachmentTransformRules AttachmentRules(EAttachmentRule::SnapToTarget, false);
-		Weapon->AttachToComponent(GetMesh(), AttachmentRules, "WeaponSocket");
-	}
-}
