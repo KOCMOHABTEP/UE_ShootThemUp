@@ -3,6 +3,7 @@
 
 #include "Weapon/STUBaseWeapon.h"
 
+#include "Engine/DamageEvents.h"
 #include "GameFramework/Character.h"
 
 DEFINE_LOG_CATEGORY_STATIC(LogBaseWeapon, All, All);
@@ -22,9 +23,15 @@ void ASTUBaseWeapon::BeginPlay()
 	check(WeaponMesh);
 }
 
-void ASTUBaseWeapon::Fire()
+void ASTUBaseWeapon::StartFire()
 {
 	MakeShot();
+	GetWorldTimerManager().SetTimer(ShotTimerHandle, this, &ASTUBaseWeapon::MakeShot, TimeBetweenShots, true);
+}
+
+void ASTUBaseWeapon::StopFire()
+{
+	GetWorldTimerManager().ClearTimer(ShotTimerHandle);
 }
 
 void ASTUBaseWeapon::MakeShot()
@@ -39,9 +46,9 @@ void ASTUBaseWeapon::MakeShot()
 
 	if (HitResult.bBlockingHit)
 	{
+		MakeDamage(HitResult);
 		DrawDebugLine(GetWorld(), GetMuzzleWorldLocation(), HitResult.ImpactPoint, FColor::Red, false, 3.0f, 0, 3.0f);
 		DrawDebugSphere(GetWorld(), HitResult.ImpactPoint, 10.0f, 24, FColor::Red, false, 5.0f);
-		UE_LOG(LogBaseWeapon, Display, TEXT("Bone: %s"), *HitResult.BoneName.ToString());
 	} else
 	{
 		DrawDebugLine(GetWorld(), GetMuzzleWorldLocation(), TraceEnd, FColor::Red, false, 3.0f, 0, 3.0f);
@@ -79,7 +86,8 @@ bool ASTUBaseWeapon::GetTraceData(FVector& TraceStart, FVector& TraceEnd) const
 	if (!GetPlayerViewPoint(ViewLocation, ViewRotation)) return false;
 
 	TraceStart = ViewLocation; // GetMuzzleWorldLocation();
-	const FVector ShootDirection = ViewRotation.Vector(); // SocketTransform.GetRotation().GetForwardVector();
+	const auto HalfRad = FMath::DegreesToRadians(BulletSpread);
+	const FVector ShootDirection = FMath::VRandCone(ViewRotation.Vector(), HalfRad) ; // SocketTransform.GetRotation().GetForwardVector();
 	TraceEnd = TraceStart + ShootDirection * TraceMaxDistance;
 
 	return true;
@@ -92,4 +100,14 @@ void ASTUBaseWeapon::MakeHit(FHitResult& HitResult, const FVector& TraceStart, c
 	FCollisionQueryParams CollisionQueryParams;
 	CollisionQueryParams.AddIgnoredActor(GetOwner());
 	GetWorld()->LineTraceSingleByChannel(HitResult, TraceStart, TraceEnd, ECollisionChannel::ECC_Visibility, CollisionQueryParams);
+}
+
+void ASTUBaseWeapon::MakeDamage(const FHitResult& HitResult)
+{
+	const auto DamagedActor = HitResult.GetActor();
+	if (!DamagedActor) return;
+
+	UE_LOG(LogBaseWeapon, Display, TEXT("Bone: %s"), *HitResult.BoneName.ToString());
+	DamagedActor->TakeDamage(DamageAmount, FDamageEvent(), GetPlayerController(), this);
+	
 }
