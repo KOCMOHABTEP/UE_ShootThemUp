@@ -1,7 +1,7 @@
 // Shoot Them Up Game. All Rights Reserved.
 
+#include "STURifleWeapon.h"
 #include "DrawDebugHelpers.h"
-#include "Weapon/STURifleWeapon.h"
 
 #include "Engine/DamageEvents.h"
 
