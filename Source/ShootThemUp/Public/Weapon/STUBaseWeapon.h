@@ -6,6 +6,8 @@
 #include "GameFramework/Actor.h"
 #include "STUBaseWeapon.generated.h"
 
+DECLARE_MULTICAST_DELEGATE(FOnClipEmptySignature);
+
 USTRUCT(BlueprintType)
 struct FAmmoData
 {
@@ -28,8 +30,14 @@ class SHOOTTHEMUP_API ASTUBaseWeapon : public AActor
 	
 public:	
 	ASTUBaseWeapon();
+
+	FOnClipEmptySignature OnClipEmpty;
+	
 	virtual void StartFire();
 	virtual void StopFire();
+	
+	void ChangeClip();
+	bool CanReload() const;
 
 protected:
 
@@ -58,7 +66,6 @@ protected:
 	void DecreaseAmmo();
 	bool IsAmmoEmpty() const;
 	bool IsClipEmpty() const;
-	void ChangeClip();
 	void LogAmmo();
 
 private:
