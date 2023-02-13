@@ -23,7 +23,8 @@ public:
 	void ChangeClip();
 	bool CanReload() const;
 
-	FWeaponUIData GetUIData() const {return UIData; }
+	FWeaponUIData GetUIData() const { return UIData; }
+	FAmmoData GetAmmoData() const { return CurrentAmmo; }
 
 protected:
 
