@@ -15,16 +15,19 @@ class SHOOTTHEMUP_API USTUHealthComponent : public UActorComponent
 public:	
 	USTUHealthComponent();
 
-	float GetHealth() const { return Health; }
+	FonDeath OnDeath;
+	FOnHealthChanged OnHealthChanged;
 
 	UFUNCTION(BlueprintCallable, Category = "Health")
 	bool IsDead() const { return  FMath::IsNearlyZero(Health); }
 	
 	UFUNCTION(BlueprintCallable, Category = "Health")
 	float GetHealthPercent() const { return Health / MaxHealth; };
-	
-	FonDeath OnDeath;
-	FOnHealthChanged OnHealthChanged;
+
+	float GetHealth() const { return Health; }
+
+	bool TryToAddHealth(float HealthAmount);
+	bool IsHealthFull() const;
 
 protected:
 

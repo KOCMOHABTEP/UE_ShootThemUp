@@ -3,7 +3,7 @@
 
 //  WeaponComponent
 class ASTUBaseWeapon;
-DECLARE_MULTICAST_DELEGATE(FOnClipEmptySignature);
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnClipEmptySignature, ASTUBaseWeapon*);
 
 // Health Component
 DECLARE_MULTICAST_DELEGATE(FonDeath)
