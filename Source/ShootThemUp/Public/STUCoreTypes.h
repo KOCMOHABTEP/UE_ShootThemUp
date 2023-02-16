@@ -7,7 +7,7 @@ DECLARE_MULTICAST_DELEGATE_OneParam(FOnClipEmptySignature, ASTUBaseWeapon*);
 
 // Health Component
 DECLARE_MULTICAST_DELEGATE(FonDeath)
-DECLARE_MULTICAST_DELEGATE_OneParam(FOnHealthChanged, float)
+DECLARE_MULTICAST_DELEGATE_TwoParams(FOnHealthChanged, float, float)
 
 USTRUCT(BlueprintType)
 struct FAmmoData
