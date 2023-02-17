@@ -7,6 +7,7 @@
 #include "STURifleWeapon.generated.h"
 
 class USTUWeaponFXComponent;
+class UNiagaraComponent;
 
 UCLASS()
 class SHOOTTHEMUP_API ASTURifleWeapon : public ASTUBaseWeapon
@@ -36,6 +37,12 @@ protected:
 	virtual bool GetTraceData(FVector& TraceStart, FVector& TraceEnd) const override;
 private:
 	FTimerHandle ShotTimerHandle;
+	
+	UPROPERTY()
+	UNiagaraComponent* MuzzleFXComponent;
 
 	void MakeDamage(const FHitResult& HitResult);
+	void InitMuzzleFX();
+	void SetMuzzleFXVisibility(bool Visible);
+	
 };
