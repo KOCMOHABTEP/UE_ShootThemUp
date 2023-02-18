@@ -18,7 +18,6 @@ class SHOOTTHEMUP_API ASTUBaseCharacter : public ACharacter
 	GENERATED_BODY()
 
 public:
-	// Sets default values for this character's properties
 	ASTUBaseCharacter(const FObjectInitializer& ObjectInitializer);
 
 protected:

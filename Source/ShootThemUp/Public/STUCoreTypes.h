@@ -6,7 +6,7 @@ class ASTUBaseWeapon;
 DECLARE_MULTICAST_DELEGATE_OneParam(FOnClipEmptySignature, ASTUBaseWeapon*);
 
 // Health Component
-DECLARE_MULTICAST_DELEGATE(FonDeath)
+DECLARE_MULTICAST_DELEGATE(FOnDeath)
 DECLARE_MULTICAST_DELEGATE_TwoParams(FOnHealthChanged, float, float)
 
 USTRUCT(BlueprintType)

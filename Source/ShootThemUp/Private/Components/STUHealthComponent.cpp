@@ -52,6 +52,7 @@ void USTUHealthComponent::OnTakeAnyDamage(AActor* DamagedActor, float Damage, co
 	}
 
 	SetHealth(Health - Damage);
+	GetWorld()->GetTimerManager().ClearTimer(HealTimerHandle);
 	
 	if (IsDead())
 	{

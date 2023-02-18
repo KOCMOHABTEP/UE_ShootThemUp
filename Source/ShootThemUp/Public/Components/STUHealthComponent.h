@@ -17,7 +17,7 @@ class SHOOTTHEMUP_API USTUHealthComponent : public UActorComponent
 public:	
 	USTUHealthComponent();
 
-	FonDeath OnDeath;
+	FOnDeath OnDeath;
 	FOnHealthChanged OnHealthChanged;
 
 	UFUNCTION(BlueprintCallable, Category = "Health")
