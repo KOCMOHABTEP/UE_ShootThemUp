@@ -4,6 +4,7 @@
 #include "STUGameModeBase.h"
 
 #include "AIController.h"
+#include "EngineUtils.h"
 #include "STUBaseCharacter.h"
 #include "STUGameHUD.h"
 #include "STUPlayerController.h"
@@ -107,8 +108,7 @@ void ASTUGameModeBase::GameTimerUpdate()
 			StartRound();
 		} else
 		{
-			UE_LOG(LogSTUGameModeBase, Display, TEXT("==== GAME OVER ===="));
-			LogPlayerInfo();
+			GameOver();
 		}
 	}
 }
@@ -204,4 +204,19 @@ void ASTUGameModeBase::StartRespawn(AController* Controller)
 	if (!RespawnComponent) return;
 
 	RespawnComponent->Respawn(GameData.RespawnTime);
+}
+
+void ASTUGameModeBase::GameOver()
+{
+	UE_LOG(LogSTUGameModeBase, Display, TEXT("==== GAME OVER ===="));
+	LogPlayerInfo();
+
+	for (auto Pawn: TActorRange<APawn>(GetWorld()))
+	{
+		if (Pawn)
+		{
+			Pawn->TurnOff();
+			Pawn->DisableInput(nullptr);
+		}
+	}
 }
