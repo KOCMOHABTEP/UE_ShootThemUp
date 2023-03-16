@@ -39,6 +39,7 @@ protected:
 	
 	virtual void BeginPlay() override;
 	virtual void OnDeath();
+	virtual void OnHealthChanged(float Health, float HealthDelta);
 
 public:	
 	virtual void Tick(float DeltaTime) override;
@@ -52,8 +53,6 @@ public:
 	void SetPlayerColor(const FLinearColor& Color);
 
 private:
-	void OnHealthChanged(float Health, float HealthDelta);
-
 	UFUNCTION()
 	void OnGroundLanded(const FHitResult& HitResult);
 
