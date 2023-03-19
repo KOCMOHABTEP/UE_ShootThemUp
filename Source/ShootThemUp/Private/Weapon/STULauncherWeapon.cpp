@@ -2,7 +2,8 @@
 
 
 #include "Weapon/STULauncherWeapon.h"
-
+#include "Kismet/GameplayStatics.h"
+#include "Sound/SoundCue.h"
 
 #include "Weapon/STUProjectile.h"
 
@@ -13,8 +14,13 @@ void ASTULauncherWeapon::StartFire()
 
 void ASTULauncherWeapon::MakeShot()
 {
+	if (!GetWorld()) return;
 
-	if (!GetWorld() || IsAmmoEmpty()) return;
+	if (IsAmmoEmpty())
+	{
+		UGameplayStatics::SpawnSoundAtLocation(GetWorld(), NoAmmoSound, GetActorLocation());
+		return;
+	}
 
 	FVector TraceStart, TraceEnd;
 	if (!GetTraceData(TraceStart, TraceEnd)) return;
@@ -37,5 +43,6 @@ void ASTULauncherWeapon::MakeShot()
 
 	DecreaseAmmo();
 	SpawnMuzzleFX();
+	UGameplayStatics::SpawnSoundAttached(FireSound, WeaponMesh, MuzzleSocketName);
 }
 
