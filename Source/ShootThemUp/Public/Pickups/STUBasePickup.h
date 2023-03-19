@@ -6,6 +6,7 @@
 #include "GameFramework/Actor.h"
 #include "STUBasePickup.generated.h"
 
+class USoundCue;
 class USphereComponent;
 
 UCLASS()
@@ -20,8 +21,11 @@ protected:
 	UPROPERTY(VisibleAnywhere, Category="Pickup")
 	USphereComponent* CollisionComponent;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Pickup")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Pickup")
 	float RespawnTime = 5.0f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Sound")
+	USoundCue* PickupTakenSound;
 	
 	virtual void BeginPlay() override;
 	virtual void NotifyActorBeginOverlap(AActor* OtherActor) override;
