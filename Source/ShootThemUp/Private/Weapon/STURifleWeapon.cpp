@@ -97,8 +97,9 @@ void ASTURifleWeapon::MakeDamage(const FHitResult& HitResult)
 	const auto DamagedActor = HitResult.GetActor();
 	if (!DamagedActor) return;
 
-	UE_LOG(LogTemp, Display, TEXT("Bone: %s"), *HitResult.BoneName.ToString());
-	DamagedActor->TakeDamage(DamageAmount, FDamageEvent(), GetController(), this);
+	FPointDamageEvent PointDamageEvent;
+	PointDamageEvent.HitInfo = HitResult;
+	DamagedActor->TakeDamage(DamageAmount, PointDamageEvent, GetController(), this);
 	
 }
 

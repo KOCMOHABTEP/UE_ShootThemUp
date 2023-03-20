@@ -4,6 +4,7 @@
 #include "Components/STUHealthComponent.h"
 
 #include "STUGameModeBase.h"
+#include "GameFramework/Character.h"
 
 DEFINE_LOG_CATEGORY_STATIC(LogHealthComponent, All, All)
 
@@ -41,13 +42,35 @@ void USTUHealthComponent::BeginPlay()
 	if (ComponentOwner)
 	{
 		ComponentOwner->OnTakeAnyDamage.AddDynamic(this, &USTUHealthComponent::OnTakeAnyDamage);
+		ComponentOwner->OnTakePointDamage.AddDynamic(this, &USTUHealthComponent::OnTakePointDamage);
+		ComponentOwner->OnTakeRadialDamage.AddDynamic(this, &USTUHealthComponent::OnTakeRadialDamage);
 	}
 }
 
 void USTUHealthComponent::OnTakeAnyDamage(AActor* DamagedActor, float Damage, const UDamageType* DamageType,
 	AController* InstigatedBy, AActor* DamageCauser)
 {
+	UE_LOG(LogHealthComponent, Display, TEXT("On any damage: %f"), Damage);
+}
 
+void USTUHealthComponent::OnTakePointDamage(AActor* DamagedActor, float Damage, AController* InstigatedBy,
+	FVector HitLocation, UPrimitiveComponent* FHitComponent, FName BoneName, FVector ShotFromDirection,
+	const UDamageType* DamageType, AActor* DamageCauser)
+{
+	const auto FinalDamage = Damage * GetPointDamageModifier(DamagedActor, BoneName);
+	UE_LOG(LogHealthComponent, Display, TEXT("On point damage: %f, final damage: %f, bone: %s"), Damage, FinalDamage, *BoneName.ToString());
+	ApplyDamage(Damage, InstigatedBy);
+}
+
+void USTUHealthComponent::OnTakeRadialDamage(AActor* DamagedActor, float Damage, const UDamageType* DamageType,
+	FVector Origin, FHitResult HitInfo, AController* InstigatedBy, AActor* DamageCauser)
+{
+	UE_LOG(LogHealthComponent, Display, TEXT("On radial damage: %f"), Damage);
+	ApplyDamage(Damage, InstigatedBy);
+}
+
+void USTUHealthComponent::ApplyDamage(float Damage, AController* InstigatedBy)
+{
 	if (Damage <= 0.0f || IsDead() || !GetWorld())
 	{
 		return;
@@ -65,6 +88,22 @@ void USTUHealthComponent::OnTakeAnyDamage(AActor* DamagedActor, float Damage, co
 		GetWorld()->GetTimerManager().SetTimer(HealTimerHandle, this, &USTUHealthComponent::HealUpdate, HealUpdateTime, true, HealDelay);
 	}
 	PlayCameraShake();
+}
+
+float USTUHealthComponent::GetPointDamageModifier(AActor* DamagedActor, const FName& BoneName)
+{
+	const auto Character = Cast<ACharacter>(DamagedActor);
+	if (
+		!Character ||
+		!Character->GetMesh() ||
+		!Character->GetMesh()->GetBodyInstance(BoneName)
+	)
+		return 1.0f;
+
+	const auto PhysMaterial = Character->GetMesh()->GetBodyInstance(BoneName)->GetSimplePhysicalMaterial();
+	if (!PhysMaterial || !DamageModifiers.Contains(PhysMaterial)) return 1.0f;
+
+	return DamageModifiers[PhysMaterial];
 }
 
 void USTUHealthComponent::HealUpdate()
