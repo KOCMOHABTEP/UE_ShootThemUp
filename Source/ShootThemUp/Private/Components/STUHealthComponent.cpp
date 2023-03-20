@@ -5,13 +5,13 @@
 
 #include "STUGameModeBase.h"
 #include "GameFramework/Character.h"
+#include "Perception/AISense_Damage.h"
 
 DEFINE_LOG_CATEGORY_STATIC(LogHealthComponent, All, All)
 
 // Sets default values for this component's properties
 USTUHealthComponent::USTUHealthComponent()
 {
-
 	PrimaryComponentTick.bCanEverTick = false;
 }
 
@@ -88,6 +88,7 @@ void USTUHealthComponent::ApplyDamage(float Damage, AController* InstigatedBy)
 		GetWorld()->GetTimerManager().SetTimer(HealTimerHandle, this, &USTUHealthComponent::HealUpdate, HealUpdateTime, true, HealDelay);
 	}
 	PlayCameraShake();
+	ReportDamageEvent(Damage, InstigatedBy);
 }
 
 float USTUHealthComponent::GetPointDamageModifier(AActor* DamagedActor, const FName& BoneName)
@@ -104,6 +105,20 @@ float USTUHealthComponent::GetPointDamageModifier(AActor* DamagedActor, const FN
 	if (!PhysMaterial || !DamageModifiers.Contains(PhysMaterial)) return 1.0f;
 
 	return DamageModifiers[PhysMaterial];
+}
+
+void USTUHealthComponent::ReportDamageEvent(float Damage, AController* InstigatedBy)
+{
+	if (!InstigatedBy || !InstigatedBy->GetPawn() || !GetOwner()) return;
+	
+	UAISense_Damage::ReportDamageEvent(
+		GetWorld(),
+		GetOwner(),
+		InstigatedBy->GetPawn(),
+		Damage,
+		InstigatedBy->GetPawn()->GetActorLocation(),
+		GetOwner()->GetActorLocation()
+	);
 }
 
 void USTUHealthComponent::HealUpdate()
